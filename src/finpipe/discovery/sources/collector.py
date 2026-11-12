@@ -1,0 +1,98 @@
+import json
+import logging
+from datetime import datetime
+from pathlib import Path
+
+from finpipe.app.settings import Scope
+from finpipe.discovery.models import PaperRecord
+from finpipe.discovery.sources.arxiv import ArxivClient
+from finpipe.discovery.sources.crossref import CrossrefClient
+from finpipe.discovery.sources.semantic_scholar import SemanticScholarClient
+from finpipe.discovery.sources.settings import (
+    ArxivConfig,
+    CrossrefConfig,
+    SemanticScholarConfig,
+)
+
+logger = logging.getLogger(__name__)
+
+
+class PaperCollector:
+    def __init__(
+        self,
+        arxiv_config: ArxivConfig,
+        crossref_config: CrossrefConfig,
+        s2_config: SemanticScholarConfig,
+    ):
+        """
+        Paper record scraping and enrichment
+
+        Args:
+            arxiv_config: Arxiv scraping config
+            crossref_config: Crossref doi enrichment config
+            s2_config: Semantic-scholar metadate enrichment config
+        """
+        self.arxiv = ArxivClient(arxiv_config)
+        self.crossref = CrossrefClient(crossref_config)
+        self.s2 = SemanticScholarClient(s2_config)
+
+    def retrieve_paper(self, arxiv_id: str, scope_id: str) -> PaperRecord:
+        paper = self.arxiv.get_paper(arxiv_id, scope_id)
+        papers = self._enrich({paper.paper_id: paper})
+        return papers[paper.paper_id]
+
+    def collect_scope(
+        self,
+        scope: Scope,
+        since_date: datetime | None,
+        until_date: datetime,
+        per_scope_limit: int,
+    ) -> dict[str, PaperRecord]:
+        """
+        Scrape and enrich papers for a given scope
+
+        Args:
+            scope: Scope configuration
+            since_date: Optional date to search from
+            until_date: Optional date to search to
+            per_scope_limit: Max number of papers to return for this scope
+
+        Returns:
+            Dictionary of paper records indexed by their id
+        """
+        papers = self.arxiv.scrape_scope(
+            scope,
+            since_date=since_date,
+            until_date=until_date,
+            max_papers=per_scope_limit,
+        )
+        return self._enrich(papers)
+
+    def _enrich(self, papers: dict[str, PaperRecord]) -> dict[str, PaperRecord]:
+        """Resolve DOI metadata before Semantic Scholar enriches the records."""
+        return self.s2.enrich(self.crossref.enrich_doi(papers))
+
+    def dump_papers(
+        self,
+        output_path: Path,
+        scope: Scope,
+        papers: dict[str, PaperRecord],
+    ) -> None:
+        """
+        Dump scraped data to a JSON file
+
+        Args:
+            output_path: Output folder
+            scope: Scope associated with the scraped papers
+            papers: Nested dictionary of scopes and papers scraped from each
+        """
+        output_file = output_path / f"{scope.id}.json"
+
+        logger.info(f"Logging scraped papers to {output_file}")
+
+        with open(output_file, "w") as f:
+            json.dump(
+                [x.model_dump(mode="json") for x in papers.values()],
+                f,
+                indent=4,
+            )

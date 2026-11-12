@@ -1,0 +1,39 @@
+# Replace all example paths, provenance, image digests, and metric contracts.
+# This is an index of existing exported tasks, not a new/generated dataset.
+schema_version = 1
+
+[[tasks]]
+id = "training-task"
+path = "../tasks/training-task"
+split = "train"
+groups = ["paper:SOURCE_PAPER_ID", "dataset:SOURCE_DATASET_FAMILY"]
+image = "REGISTRY/solver@sha256:REPLACE_WITH_64_HEX_DIGEST"
+verifier_image = "REGISTRY/verifier@sha256:REPLACE_WITH_64_HEX_DIGEST"
+reward_key = "EXISTING_REWARD_KEY"
+success_key = "EXISTING_REWARD_KEY"
+success_threshold = 1.0 # replace with a domain-approved threshold before freezing
+metrics = { EXISTING_REWARD_KEY = "maximize" }
+
+[[tasks]]
+id = "validation-task"
+path = "../tasks/validation-task"
+split = "validation"
+groups = ["paper:INDEPENDENT_VALIDATION_PAPER", "dataset:INDEPENDENT_VALIDATION_DATA"]
+image = "REGISTRY/solver@sha256:REPLACE_WITH_64_HEX_DIGEST"
+verifier_image = "REGISTRY/verifier@sha256:REPLACE_WITH_64_HEX_DIGEST"
+reward_key = "EXISTING_REWARD_KEY"
+success_key = "EXISTING_REWARD_KEY"
+success_threshold = 1.0
+metrics = { EXISTING_REWARD_KEY = "maximize" }
+
+[[tasks]]
+id = "heldout-task"
+path = "../tasks/heldout-task"
+split = "test"
+groups = ["paper:INDEPENDENT_TEST_PAPER", "dataset:INDEPENDENT_TEST_DATA"]
+image = "REGISTRY/solver@sha256:REPLACE_WITH_64_HEX_DIGEST"
+verifier_image = "REGISTRY/verifier@sha256:REPLACE_WITH_64_HEX_DIGEST"
+reward_key = "EXISTING_REWARD_KEY"
+success_key = "EXISTING_REWARD_KEY"
+success_threshold = 1.0
+metrics = { EXISTING_REWARD_KEY = "maximize" }

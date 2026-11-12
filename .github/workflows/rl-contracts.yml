@@ -1,0 +1,19 @@
+name: RL framework contracts
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  cpu-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884
+        with:
+          version: '0.13.4'
+      - run: uv sync --project rl --frozen --group contract
+      - run: uv run --project rl --frozen --group contract python -m pytest tests/rl --confcutdir tests/rl -q
+      - run: uv build --project rl

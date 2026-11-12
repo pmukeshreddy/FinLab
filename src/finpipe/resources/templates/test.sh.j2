@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cp -a /logs/artifacts/. /app/
+uv run {{ requirements | map("strformat", "--with %s") | join(" ") }} /app/verifier.py

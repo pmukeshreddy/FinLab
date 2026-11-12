@@ -1,0 +1,25 @@
+arxiv:
+  page_size: 100
+  # The date window already bounds recency, so rank within it by relevance
+  sort_by: Relevance
+  request_interval_sec: 3.0
+  num_retries: 5
+crossref:
+  enabled: false
+  base_url: https://api.crossref.org
+  max_results: 10
+  timeout_sec: 25.0
+  request_delay_secs: 5
+  min_title_similarity: 0.82
+  mailto: null
+semantic_scholar:
+  enabled: true
+  batch_size: 500
+  timeout_sec: 30
+  api_url: https://api.semanticscholar.org
+  retry: true
+  request_delay_secs: 3
+max_papers_per_scope: 12
+# A 30-day window starves the narrower scopes; 90 days clears the budget for all of them
+since: 2025-11-01
+until: 2026-01-30

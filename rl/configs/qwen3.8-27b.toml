@@ -1,0 +1,112 @@
+# A starting topology, not a measured capacity/performance claim. Tune on the cluster.
+max_steps = 100
+seq_len = 32768
+dashboard = false
+
+[log]
+json_logging = true
+
+[model]
+name = "Qwen/Qwen3.8-27B"
+
+[model.vlm]
+freeze_vision_encoder = true
+
+[deployment]
+type = "single_node"
+gpus_per_node = 8
+num_train_gpus = 4
+num_infer_gpus = 4
+
+[ckpt]
+interval = 10
+keep_last = 3
+keep_interval = 50
+
+[weight_broadcast]
+type = "filesystem"
+
+[trainer.optim]
+lr = 1e-5
+
+[trainer.model.lora]
+rank = 16
+alpha = 32
+dropout = 0.0
+target_modules = ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+
+[orchestrator]
+batch_size = 128
+max_staleness = 2
+
+[orchestrator.renderer]
+name = "qwen3.8"
+enable_thinking = true
+preserve_thinking = true
+
+[orchestrator.concurrency]
+min_inflight = 8
+max_inflight = 32
+
+[orchestrator.train]
+group_size = 8
+
+[orchestrator.train.algo]
+type = "grpo"
+
+[orchestrator.train.sampling]
+temperature = 0.8
+max_completion_tokens = 8192
+
+[orchestrator.train.env]
+timeout.episode = 2400
+retries.max_retries = 2
+
+[[orchestrator.train.source]]
+name = "finpipe-train"
+env.taskset.id = "finpipe-rl"
+env.taskset.split = "train"
+env.agent.harness.id = "bash"
+env.agent.runtime.type = "docker"
+env.agent.max_turns = 32
+env.agent.timeout.setup = 600
+env.agent.timeout.finalize = 120
+env.agent.scoring.retries.max_retries = 2
+serve.pool.type = "static"
+serve.pool.num_workers = 4
+serve.max_concurrent = 8
+
+[orchestrator.eval]
+interval = 10
+group_size = 2
+
+[orchestrator.eval.sampling]
+temperature = 0.8
+max_tokens = 8192
+seed = 42
+
+[orchestrator.eval.env]
+timeout.episode = 2400
+retries.max_retries = 2
+
+[[orchestrator.eval.source]]
+name = "finpipe-validation"
+env.taskset.id = "finpipe-rl"
+env.taskset.split = "validation"
+env.agent.harness.id = "bash"
+env.agent.runtime.type = "docker"
+env.agent.max_turns = 32
+env.agent.timeout.setup = 600
+env.agent.timeout.finalize = 120
+env.agent.scoring.retries.max_retries = 2
+serve.pool.type = "static"
+serve.pool.num_workers = 2
+serve.max_concurrent = 8
+
+[inference.vllm]
+dtype = "bfloat16"
+enable_lora = true
+max_lora_rank = 16
+tensor_parallel_size = 4
+gpu_memory_utilization = 0.85
+seed = 42

@@ -1,0 +1,22 @@
+[project]
+name = "finpipe-rl"
+version = "0.1.0"
+description = "Prime-RL integration for existing Finpipe Harbor tasks"
+requires-python = ">=3.12,<3.13"
+dependencies = ["pydantic>=2.12.3,<3"]
+
+[dependency-groups]
+contract = ["prime-rl-configs", "verifiers[harbor]", "renderers", "prime-pydantic-config", "pytest>=9,<10"]
+
+[tool.uv.sources]
+prime-rl-configs = { git = "https://github.com/PrimeIntellect-ai/prime-rl", rev = "a3ee545b686189a860aba4ee3c9f230aa1ae4705", subdirectory = "packages/prime-rl-configs" }
+verifiers = { git = "https://github.com/PrimeIntellect-ai/verifiers", rev = "ae5e56bc4e714c782817b4bde822fa084fc319d2" }
+renderers = { git = "https://github.com/PrimeIntellect-ai/renderers", rev = "c3133fcc5bd577e4d0061398dc67b0dc15ff5308" }
+prime-pydantic-config = { git = "https://github.com/PrimeIntellect-ai/pydantic-config", rev = "65b15dffba82d4be19efdaf8b2b9705cc1756be8" }
+
+[project.scripts]
+finpipe-rl = "finpipe_rl.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.8.14,<0.9.0"]
+build-backend = "uv_build"

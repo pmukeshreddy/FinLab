@@ -1,0 +1,68 @@
+[project]
+name = "finpipe"
+version = "0.1.0"
+description = "Financial agent benchmark and training task generation, and training utilities"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    # Use fork since main requires FastMCP < 4.0
+    "alpaca-mcp-server",
+    "arxiv>=4.0.0",
+    "docker>=7.2.0",
+    "habanero>=2.4.0",
+    "hydra-core>=1.3.2",
+    "jinja2>=3.1.6",
+    "langchain-core>=1.4.0",
+    "langchain-openai>=1.2.2",
+    "langchain-text-splitters>=1.1.2",
+    "langchain[mcp]>=1.4.4",
+    "lxml>=5.3.0",
+    "mlflow>=3.14.0",
+    "pydantic>=2.13.4",
+    "pylint>=4.0.6",
+    "pymupdf>=1.27.2.3",
+    "pymupdf4llm>=1.27.2.3",
+    "python-dotenv>=1.2.2",
+    "requests>=2.32.0",
+    "semanticscholar>=0.12.0",
+    "sqlalchemy>=2.0.50",
+    "taskipy>=1.14.1",
+    "yfinance>=1.7.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.8.14,<0.9.0"]
+build-backend = "uv_build"
+
+[project.scripts]
+finpipe = "finpipe.cli:main"
+
+[dependency-groups]
+dev = [
+    "piccolo-theme>=0.24.0",
+    "harbor>=0.20.0",
+    "pre-commit>=4.6.0",
+    "pytest>=9.0.3",
+    "ruff>=0.15.15",
+    "sphinx>=9.1.0",
+    "sphinx-autoapi>=3.8.0",
+]
+
+[tool.taskipy.tasks]
+pipeline = "python -m finpipe batch"
+paper = "python -m finpipe paper"
+docs = { cmd = "python -m sphinx -W -b html docs build/docs", help="Build docs"}
+mlflow = "uv run mlflow server --host 127.0.0.1 --port 8080 --backend-store-uri sqlite:///./mlruns.db"
+lint = "uv run pre-commit run --all-files"
+
+[tool.pytest.ini_options]
+python_classes = ["PytestCollect*"]
+pythonpath = ["rl/src"]
+
+[tool.isort]
+profile = "black"
+line_length = 88
+combine_as_imports = true
+
+[tool.uv.sources]
+alpaca-mcp-server = { git = "https://github.com/JLanghamLopez/alpaca-mcp-server.git" }

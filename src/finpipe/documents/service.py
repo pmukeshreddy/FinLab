@@ -1,0 +1,189 @@
+import logging
+import time
+from pathlib import Path
+
+import requests
+from langchain_text_splitters import MarkdownHeaderTextSplitter
+from sqlalchemy import Engine, select
+from sqlalchemy.orm import Session
+
+from finpipe.documents.html import arxiv_html_to_markdown
+from finpipe.documents.settings import RetrievalConfig
+from finpipe.documents.text import (
+    DEFAULT_HEADERS_TO_SPLIT,
+    chunk_markdown,
+    pdf_to_markdown,
+)
+from finpipe.storage.models import (
+    Chunk,
+    Paper,
+    PaperStatus,
+    RejectionReason,
+    SourceFormat,
+    SourceName,
+)
+from finpipe.storage.status import set_paper_status
+
+logger = logging.getLogger(__name__)
+
+
+class PaperRetrieval:
+    def __init__(self, db: Engine, cfg: RetrievalConfig) -> None:
+        """
+        Paper retrieval and chunking stage
+
+        Args:
+            db: SqlAlchemy db engine
+            cfg: Retrieval configuration
+        """
+        self.db = db
+        self.cfg = cfg
+        self.splitter = MarkdownHeaderTextSplitter(
+            DEFAULT_HEADERS_TO_SPLIT, strip_headers=False
+        )
+        self.headers = {"User-Agent": cfg.user_agent}
+        self.next_request_at = 0.0
+
+    def download_and_chunk_papers(self, output_path: Path) -> None:
+        """
+        Download newly scraped papers, chunk them and persist chunks in DB
+
+        Args:
+            output_path: Hydra run output path
+        """
+        papers, chunked = self._pending_papers()
+        logger.info(f"Extracting chunks from {len(papers)} papers")
+        for paper in papers:
+            self._process_paper(paper, chunked)
+
+    def _pending_papers(self) -> tuple[list[Paper], set[str]]:
+        with Session(self.db) as session:
+            papers = list(
+                session.scalars(
+                    select(Paper).where(Paper.status == PaperStatus.SCRAPED)
+                )
+            )
+            chunked = set(session.scalars(select(Chunk.paper_id).distinct()))
+        return papers, chunked
+
+    def _process_paper(self, paper: Paper, chunked: set[str]) -> None:
+        # Chunks are shared across scopes, even when this record lacks a URL.
+        if paper.paper_id in chunked:
+            set_paper_status(self.db, paper, PaperStatus.EXTRACTED)
+            return
+        if not paper.pdf_url:
+            set_paper_status(
+                self.db,
+                paper,
+                PaperStatus.REJECTED,
+                rejection_reason=RejectionReason.NoPaperURL,
+            )
+            return
+        try:
+            markdown, source_format = self.retrieve_markdown(paper)
+            with Session(self.db) as session:
+                session.add_all(self.chunk(paper.paper_id, markdown, source_format))
+                session.commit()
+        except Exception as e:  # noqa: BLE001 - isolate failure to this pipeline item
+            logger.error(f"Paper {paper.paper_id} retrieval and chunking failed: {e}")
+            set_paper_status(
+                self.db,
+                paper,
+                PaperStatus.ERRORED,
+                rejection_reason=RejectionReason.RetrievalError,
+            )
+            return
+        chunked.add(paper.paper_id)
+        set_paper_status(self.db, paper, PaperStatus.EXTRACTED)
+        logger.debug(f"Paper {paper.paper_id} chunked from {source_format.value}")
+
+    def retrieve_markdown(self, paper: Paper) -> tuple[str, SourceFormat]:
+        """
+        Retrieve a paper as markdown, trying each configured format in turn
+
+        Args:
+            paper: Paper record
+
+        Returns:
+            Paper markdown and the format it was derived from
+        """
+        for source_format in map(SourceFormat, self.cfg.source_preference):
+            url = self.source_url(paper, source_format)
+            if not url:
+                continue
+
+            source = self.get(url)
+            if source is None:
+                continue
+
+            if source_format == SourceFormat.HTML:
+                return arxiv_html_to_markdown(source), source_format
+
+            return pdf_to_markdown(source), source_format
+
+        raise RuntimeError(f"No source available for {paper.paper_id}")
+
+    def source_url(self, paper: Paper, source_format: SourceFormat) -> str | None:
+        """
+        Build the download URL for a paper in a given format
+
+        Args:
+            paper: Paper record
+            source_format: Format to download
+
+        Returns:
+            Download URL, or None if the paper cannot be served in this format
+        """
+        if source_format == SourceFormat.PDF:
+            return paper.pdf_url
+
+        # arXiv renders LaTeX submissions to HTML, addressed by versioned id
+        if paper.source != SourceName.ARXIV or not paper.arxiv_url:
+            return None
+
+        return self.cfg.arxiv_html_url.format(id=paper.arxiv_url.rsplit("/", 1)[-1])
+
+    def get(self, url: str) -> bytes | None:
+        """
+        Fetch a URL, rate limited from the previous request rather than its completion
+
+        Args:
+            url: URL to fetch
+
+        Returns:
+            Response body, or None if the source was unavailable
+        """
+        time.sleep(max(0.0, self.next_request_at - time.monotonic()))
+        self.next_request_at = time.monotonic() + self.cfg.request_interval_sec
+
+        try:
+            response = requests.get(
+                url, headers=self.headers, timeout=self.cfg.timeout_sec
+            )
+            response.raise_for_status()
+        except requests.RequestException as e:
+            # A paper with no HTML rendering 404s here and falls to the next format,
+            # so only an unexpected failure is worth drawing attention to
+            if e.response is not None and e.response.status_code == 404:
+                logger.debug(f"Not available at {url}")
+            else:
+                logger.warning(f"Could not retrieve {url}: {e}")
+            return None
+
+        return response.content
+
+    def chunk(
+        self, paper_id: str, markdown: str, source_format: SourceFormat
+    ) -> list[Chunk]:
+        """
+        Split paper markdown into chunks on its section headers
+
+        Args:
+            paper_id: Paper id string
+            markdown: Paper markdown
+            source_format: Format the markdown was derived from
+
+        Returns:
+            List of chunk records
+        """
+        return chunk_markdown(paper_id, markdown, source_format, splitter=self.splitter)

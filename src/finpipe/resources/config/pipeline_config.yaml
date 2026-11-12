@@ -1,0 +1,20 @@
+mlflow:
+  tracking_uri: http://localhost:8080
+  experiment_name: task-extraction-pipeline
+defaults:
+  - _self_
+  - scraping: default_scraper
+  - retrieval: default_retrieval
+  - judge: default_judge
+  - task_extractor: default_task_extractor
+  - task_critic: default_task_critic
+  - task_generator: default_task_generator
+  - task_exporter: default_task_exporter
+  - scopes:
+    - alpha_trading
+    - financial_return_forecasting
+    - financial_time_series_generation
+    - fraud_detection
+    - stress_testing
+enable_task_critic: false
+db_engine: sqlite:///./pipeline.db

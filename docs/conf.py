@@ -1,0 +1,53 @@
+import importlib.metadata
+
+project = "Finance Task Pipeline"
+release = importlib.metadata.version("finpipe")
+
+extensions = [
+    "sphinx.ext.napoleon",
+    "autoapi.extension",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.doctest",
+]
+
+autoapi_dirs = [
+    "../src/finpipe",
+]
+autoapi_options = [
+    "members",
+    "show-inheritance",
+    "show-module-summary",
+    "imported-members",
+]
+
+autoapi_member_order = "alphabetical"
+autoapi_own_page_level = "function"
+autoapi_python_class_content = "both"
+autoapi_template_dir = "_autoapi_templates"
+autoapi_python_use_implicit_namespaces = False
+autoapi_keep_files = False
+autoapi_type = "python"
+
+add_module_names = False
+add_package_names = False
+
+autodoc_typehints = "signature"
+
+exclude_patterns = ["_autoapi_templates/**"]
+
+napoleon_google_docstring = True
+napoleon_numpy_docstring = False
+
+napoleon_use_admonition_for_examples = False
+napoleon_use_admonition_for_notes = True
+napoleon_use_admonition_for_references = False
+napoleon_use_rtype = True
+napoleon_preprocess_types = True
+
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", None),
+}
+
+html_title = "Finance Task Pipeline"
+html_theme = "piccolo_theme"
+html_show_copyright = False

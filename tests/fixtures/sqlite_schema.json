@@ -1,0 +1,944 @@
+{
+  "chunks": {
+    "columns": [
+      {
+        "name": "chunk_id",
+        "type": "INTEGER",
+        "nullable": false,
+        "default": null,
+        "primary_key": 1
+      },
+      {
+        "name": "paper_id",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "chunk_index",
+        "type": "INTEGER",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "header",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "text",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "source_format",
+        "type": "VARCHAR(4)",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      }
+    ],
+    "pk": {
+      "constrained_columns": [
+        "chunk_id"
+      ],
+      "name": null
+    },
+    "foreign_keys": [],
+    "unique": [],
+    "indexes": [
+      {
+        "name": "ix_chunks_chunk_index",
+        "column_names": [
+          "chunk_index"
+        ],
+        "unique": 0,
+        "dialect_options": {}
+      },
+      {
+        "name": "ix_chunks_paper_id",
+        "column_names": [
+          "paper_id"
+        ],
+        "unique": 0,
+        "dialect_options": {}
+      }
+    ]
+  },
+  "metric_candidates": {
+    "columns": [
+      {
+        "name": "metric_id",
+        "type": "INTEGER",
+        "nullable": false,
+        "default": null,
+        "primary_key": 1
+      },
+      {
+        "name": "task_id",
+        "type": "INTEGER",
+        "nullable": false,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "name",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "description",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "input_datasets",
+        "type": "JSON",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      }
+    ],
+    "pk": {
+      "constrained_columns": [
+        "metric_id"
+      ],
+      "name": null
+    },
+    "foreign_keys": [
+      {
+        "name": null,
+        "constrained_columns": [
+          "task_id"
+        ],
+        "referred_schema": null,
+        "referred_table": "task_candidates",
+        "referred_columns": [
+          "task_id"
+        ],
+        "options": {}
+      }
+    ],
+    "unique": [],
+    "indexes": []
+  },
+  "papers": {
+    "columns": [
+      {
+        "name": "paper_id",
+        "type": "VARCHAR",
+        "nullable": false,
+        "default": null,
+        "primary_key": 1
+      },
+      {
+        "name": "scope_id",
+        "type": "VARCHAR",
+        "nullable": false,
+        "default": null,
+        "primary_key": 2
+      },
+      {
+        "name": "title",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "abstract",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "source",
+        "type": "VARCHAR(6)",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "authors",
+        "type": "JSON",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "categories",
+        "type": "JSON",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "published_at",
+        "type": "DATETIME",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "updated_at",
+        "type": "DATETIME",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "arxiv_url",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "pdf_url",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "primary_category",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "doi",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "citation_count",
+        "type": "INTEGER",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "semantic_scholar_id",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "influential_citation_count",
+        "type": "INTEGER",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "venue",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "journal_name",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "publication_types",
+        "type": "JSON",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "peer_reviewed",
+        "type": "BOOLEAN",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "prefilter_score",
+        "type": "FLOAT",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "prefilter_passed",
+        "type": "BOOLEAN",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "status",
+        "type": "VARCHAR(22)",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "rejection_reason",
+        "type": "VARCHAR(14)",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      }
+    ],
+    "pk": {
+      "constrained_columns": [
+        "paper_id",
+        "scope_id"
+      ],
+      "name": null
+    },
+    "foreign_keys": [],
+    "unique": [
+      {
+        "name": "paper_constraint",
+        "column_names": [
+          "paper_id",
+          "scope_id"
+        ]
+      }
+    ],
+    "indexes": [
+      {
+        "name": "ix_papers_status",
+        "column_names": [
+          "status"
+        ],
+        "unique": 0,
+        "dialect_options": {}
+      }
+    ]
+  },
+  "task": {
+    "columns": [
+      {
+        "name": "task_id",
+        "type": "INTEGER",
+        "nullable": false,
+        "default": null,
+        "primary_key": 1
+      },
+      {
+        "name": "name",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "task_candidate_id",
+        "type": "INTEGER",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "status",
+        "type": "VARCHAR(13)",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "train_script",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "test_script",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "assessment_script",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "requirements",
+        "type": "JSON",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "instructions",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "short_description",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "difficulty_explanation",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      }
+    ],
+    "pk": {
+      "constrained_columns": [
+        "task_id"
+      ],
+      "name": null
+    },
+    "foreign_keys": [],
+    "unique": [],
+    "indexes": [
+      {
+        "name": "ix_task_task_candidate_id",
+        "column_names": [
+          "task_candidate_id"
+        ],
+        "unique": 0,
+        "dialect_options": {}
+      }
+    ]
+  },
+  "task_candidates": {
+    "columns": [
+      {
+        "name": "task_id",
+        "type": "INTEGER",
+        "nullable": false,
+        "default": null,
+        "primary_key": 1
+      },
+      {
+        "name": "scope_id",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "paper_id",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "new",
+        "type": "BOOLEAN",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "status",
+        "type": "VARCHAR(9)",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "task_type",
+        "type": "VARCHAR(11)",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "task_name",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "plan",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "instructions",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      }
+    ],
+    "pk": {
+      "constrained_columns": [
+        "task_id"
+      ],
+      "name": null
+    },
+    "foreign_keys": [],
+    "unique": [],
+    "indexes": [
+      {
+        "name": "ix_task_candidates_paper_id",
+        "column_names": [
+          "paper_id"
+        ],
+        "unique": 0,
+        "dialect_options": {}
+      },
+      {
+        "name": "ix_task_candidates_scope_id",
+        "column_names": [
+          "scope_id"
+        ],
+        "unique": 0,
+        "dialect_options": {}
+      },
+      {
+        "name": "ix_task_candidates_status",
+        "column_names": [
+          "status"
+        ],
+        "unique": 0,
+        "dialect_options": {}
+      }
+    ]
+  },
+  "test_input_dataset_candidates": {
+    "columns": [
+      {
+        "name": "dataset_id",
+        "type": "INTEGER",
+        "nullable": false,
+        "default": null,
+        "primary_key": 1
+      },
+      {
+        "name": "task_id",
+        "type": "INTEGER",
+        "nullable": false,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "name",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "filename",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "description",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "source",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "relevant_urls",
+        "type": "JSON",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "download_link",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      }
+    ],
+    "pk": {
+      "constrained_columns": [
+        "dataset_id"
+      ],
+      "name": null
+    },
+    "foreign_keys": [
+      {
+        "name": null,
+        "constrained_columns": [
+          "task_id"
+        ],
+        "referred_schema": null,
+        "referred_table": "task_candidates",
+        "referred_columns": [
+          "task_id"
+        ],
+        "options": {}
+      }
+    ],
+    "unique": [],
+    "indexes": []
+  },
+  "test_output_dataset_candidates": {
+    "columns": [
+      {
+        "name": "dataset_id",
+        "type": "INTEGER",
+        "nullable": false,
+        "default": null,
+        "primary_key": 1
+      },
+      {
+        "name": "task_id",
+        "type": "INTEGER",
+        "nullable": false,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "name",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "filename",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "description",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "source",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "relevant_urls",
+        "type": "JSON",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "download_link",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      }
+    ],
+    "pk": {
+      "constrained_columns": [
+        "dataset_id"
+      ],
+      "name": null
+    },
+    "foreign_keys": [
+      {
+        "name": null,
+        "constrained_columns": [
+          "task_id"
+        ],
+        "referred_schema": null,
+        "referred_table": "task_candidates",
+        "referred_columns": [
+          "task_id"
+        ],
+        "options": {}
+      }
+    ],
+    "unique": [],
+    "indexes": []
+  },
+  "test_target_dataset_candidates": {
+    "columns": [
+      {
+        "name": "dataset_id",
+        "type": "INTEGER",
+        "nullable": false,
+        "default": null,
+        "primary_key": 1
+      },
+      {
+        "name": "task_id",
+        "type": "INTEGER",
+        "nullable": false,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "name",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "filename",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "description",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "source",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "relevant_urls",
+        "type": "JSON",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "download_link",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      }
+    ],
+    "pk": {
+      "constrained_columns": [
+        "dataset_id"
+      ],
+      "name": null
+    },
+    "foreign_keys": [
+      {
+        "name": null,
+        "constrained_columns": [
+          "task_id"
+        ],
+        "referred_schema": null,
+        "referred_table": "task_candidates",
+        "referred_columns": [
+          "task_id"
+        ],
+        "options": {}
+      }
+    ],
+    "unique": [],
+    "indexes": []
+  },
+  "train_input_dataset_candidates": {
+    "columns": [
+      {
+        "name": "dataset_id",
+        "type": "INTEGER",
+        "nullable": false,
+        "default": null,
+        "primary_key": 1
+      },
+      {
+        "name": "task_id",
+        "type": "INTEGER",
+        "nullable": false,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "name",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "filename",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "description",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "source",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "relevant_urls",
+        "type": "JSON",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "download_link",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      }
+    ],
+    "pk": {
+      "constrained_columns": [
+        "dataset_id"
+      ],
+      "name": null
+    },
+    "foreign_keys": [
+      {
+        "name": null,
+        "constrained_columns": [
+          "task_id"
+        ],
+        "referred_schema": null,
+        "referred_table": "task_candidates",
+        "referred_columns": [
+          "task_id"
+        ],
+        "options": {}
+      }
+    ],
+    "unique": [],
+    "indexes": []
+  },
+  "train_target_dataset_candidates": {
+    "columns": [
+      {
+        "name": "dataset_id",
+        "type": "INTEGER",
+        "nullable": false,
+        "default": null,
+        "primary_key": 1
+      },
+      {
+        "name": "task_id",
+        "type": "INTEGER",
+        "nullable": false,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "name",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "filename",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "description",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "source",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "relevant_urls",
+        "type": "JSON",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      },
+      {
+        "name": "download_link",
+        "type": "VARCHAR",
+        "nullable": true,
+        "default": null,
+        "primary_key": 0
+      }
+    ],
+    "pk": {
+      "constrained_columns": [
+        "dataset_id"
+      ],
+      "name": null
+    },
+    "foreign_keys": [
+      {
+        "name": null,
+        "constrained_columns": [
+          "task_id"
+        ],
+        "referred_schema": null,
+        "referred_table": "task_candidates",
+        "referred_columns": [
+          "task_id"
+        ],
+        "options": {}
+      }
+    ],
+    "unique": [],
+    "indexes": []
+  }
+}

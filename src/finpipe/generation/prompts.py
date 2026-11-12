@@ -1,0 +1,114 @@
+from pydantic import BaseModel
+
+from finpipe.contracts.task_types import TaskTypeParams
+from finpipe.extraction.prompts import AssessmentMetric, Dataset
+from finpipe.extraction.specifications import TaskSpecification
+
+
+class DatasetRetrieval(BaseModel):
+    training_script: str
+    testing_script: str
+    requirements: list[str]
+
+
+class Assessment(BaseModel):
+    assessment_script: str
+    requirements: list[str]
+
+
+def join_specs(specs: list[Dataset] | list[AssessmentMetric]) -> str:
+    return "\n\t".join([f"- {x.model_dump()}" for x in specs])
+
+
+def build_dataset_download_prompt(task_spec: TaskSpecification) -> str:
+
+    training_inputs = join_specs(task_spec.training_inputs)
+    training_targets = join_specs(task_spec.training_targets)
+    test_inputs = join_specs(task_spec.test_inputs)
+    test_targets = join_specs(task_spec.test_targets)
+
+    return f"""
+You are given the specification of a machine learning task. You should write
+two Python scripts to retrieve and save the datasets used as part of the
+assessment.
+
+1. training_script: A script that retrieves and saves the training_inputs, training_targets, and test_inputs datasets
+2. testing_script: A script that retrieves and saves the test_targets dataset(s)
+
+You should also produce a list of the Python requirements required by the scripts
+
+Notes:
+
+- You can use the provided tools to confirm your code is correct, and to interact with
+  Github and data providers.
+- The datasets should be written to the files assigned in the specification
+- The files should be written to the same folder as the script
+- If any random sampling is used, the process should be seeded
+- A dataset category may be empty, in which case skip it rather than writing a placeholder file
+- API keys will be provided as environment variables to access the following data services:
+
+  - Kaggle with `KAGGLE_API_TOKEN` (which has a Python library `kagglehub`)
+  - Alpaca with `ALPACA_API_KEY` and `ALPACA_SECRET_KEY` (which has a Python library `alpaca-py`)
+
+Specification:
+
+Task name: {task_spec.task_name}
+Task implementation plan: {task_spec.task_plan}
+Training input datasets:
+    {training_inputs}
+Training target / ground-truth datasets:
+    {training_targets}
+Test input datasets:
+    {test_inputs}
+Test target datasets:
+    {test_targets}
+"""
+
+
+def build_metric_prompt(
+    task_spec: TaskSpecification, task_params: TaskTypeParams
+) -> str:
+    test_outputs = join_specs(task_spec.test_outputs)
+    test_targets = join_specs(task_spec.test_targets)
+    metrics = join_specs(task_spec.metrics)
+    row_correspondence = task_params.row_correspondence
+    return f"""
+You are given the specification of a machine learning task. You should write
+a Python script that assess the test_output produced by the user against the
+target test dataset. The script should retrieve the users output, and the test
+target data, and apply the set of assessment metrics. It should then save the
+results as a json file containing a dictionary of individual metric results. The
+results should be written to `/logs/verifier/reward.json`.
+
+{row_correspondence}
+
+You should also produce a list of Python requirements required by the assessment script.
+
+Specification:
+
+Task name: {task_spec.task_name}
+Task implementation plan: {task_spec.task_plan}
+Test outputs (produced by the user):
+    {test_outputs}
+Test targets/ground-truth:
+    {test_targets}
+Assessment metrics:
+    {metrics}
+"""
+
+
+def build_description_summary_prompt(description: str) -> str:
+    return f"""
+Write a short one paragraph summary of the following machine learning task:
+
+{description}
+"""
+
+
+def build_difficulty_explanation_prompt(description: str) -> str:
+    return f"""
+Write a short one paragraph assessment of the difficulty of the following
+machine learning task:
+
+{description}
+"""

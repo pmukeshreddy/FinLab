@@ -1,0 +1,39 @@
+# Use this identical protocol for both model endpoints.
+model = "Qwen/Qwen3.8-27B"
+group_size = 4
+dashboard = false
+
+[log]
+json_logging = true
+
+[client]
+base_url = "http://localhost:8000/v1"
+api_key_var = "INFERENCE_API_KEY"
+
+[concurrency]
+min_inflight = 8
+max_inflight = 8
+
+[sampling]
+temperature = 0.8
+max_tokens = 8192
+seed = 42
+chat_template_kwargs = {enable_thinking = true, preserve_thinking = true}
+
+[env]
+timeout.episode = 2400
+retries.max_retries = 2
+
+[[source]]
+name = "finpipe-test"
+env.taskset.id = "finpipe-rl"
+env.taskset.split = "test"
+env.agent.harness.id = "bash"
+env.agent.runtime.type = "docker"
+env.agent.max_turns = 32
+env.agent.timeout.setup = 600
+env.agent.timeout.finalize = 120
+env.agent.scoring.retries.max_retries = 2
+serve.pool.type = "static"
+serve.pool.num_workers = 2
+serve.max_concurrent = 8
